@@ -2,9 +2,13 @@ const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
 
 const bg = document.getElementById("canvasBG");
+const bgWidth = bg.naturalWidth;
+const bgHeight = bg.naturalHeight;
+
 const logo = document.getElementById("canvasLogo");
 
-console.log(bg.naturalWidth, bg.naturalHeight);
+const logoPosOutput = document.getElementById("logoPosOutput");
+const mergeButton = document.getElementById("mergeButton");
 
 const canvasWidth = 800;
 const canvasheight = canvasWidth * (bg.naturalHeight/bg.naturalWidth);
@@ -29,6 +33,16 @@ let resize = false;
 let lastMouseX = false;
 let lastMouseY = false;
 
+mergeButton.addEventListener("click", function() {
+  console.log(rect);
+  const realStartX = parseInt(rect.startX/canvasWidth*bgWidth);
+  const realStartY = parseInt(rect.startY/canvasWidth*bgWidth);
+  const realWidth = parseInt(rect.w/canvasWidth*bgWidth);
+  const realHeight = parseInt(rect.h/canvasWidth*bgWidth);
+  //window.location.href=`merge.php?posx=${realStartX}&posy=${realStartY}&width=${realWidth}&height=${realHeight}`;
+  window.open(`merge.php?posx=${realStartX}&posy=${realStartY}&width=${realWidth}&height=${realHeight}`); 
+});
+
 function draw() {
   ctx.beginPath();
   
@@ -39,10 +53,19 @@ function draw() {
   ctx.rect(rect.startX, rect.startY, rect.w, rect.h);
   ctx.drawImage(logo, rect.startX, rect.startY, rect.w, rect.h);
   ctx.stroke();
-  console.log(rect.startX, rect.startY, rect.w, rect.h);
+  logoPosOutput.textContent = `Logo position: ${rect.startX}, ${rect.startY}, width: ${rect.w}, height: ${rect.h}`;
 }
 
-draw();
+if (bg.complete) {
+  draw();
+}
+
+if (logo.complete) {
+  draw();
+}
+
+bg.addEventListener('load', draw);
+logo.addEventListener('load', draw);
 
 function mouseDown(e) {
   newStartX = e.pageX - this.offsetLeft;
