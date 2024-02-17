@@ -22,7 +22,7 @@ const rect = {
   h: logoStartheight
 };
 
-let drag = false;
+let drawLogo = false;
 let move = false;
 let resize = false;
 
@@ -31,13 +31,15 @@ let lastMouseY = false;
 
 function draw() {
   ctx.beginPath();
-  ctx.rect(rect.startX, rect.startY, rect.w, rect.h);
+  
   ctx.lineWidth = 10;
   ctx.strokeStyle = "red";
   ctx.lineCap = "round";
   ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
+  ctx.rect(rect.startX, rect.startY, rect.w, rect.h);
   ctx.drawImage(logo, rect.startX, rect.startY, rect.w, rect.h);
   ctx.stroke();
+  console.log(rect.startX, rect.startY, rect.w, rect.h);
 }
 
 draw();
@@ -56,12 +58,12 @@ function mouseDown(e) {
   } else {
     rect.startX = e.pageX - this.offsetLeft;
     rect.startY = e.pageY - this.offsetTop;
-    drag = true;
+    drawLogo = true;
   }
 }
 
 function mouseUp(e) {
-  drag = false;
+  drawLogo = false;
   move = false;
   resize = false;
   lastMouseX = false;
@@ -69,25 +71,27 @@ function mouseUp(e) {
 }
 
 function mouseMove(e) {
-  if (drag) {
-    rect.w = (e.pageX - this.offsetLeft) - rect.startX;
+
+  if (lastMouseX === false || lastMouseY === false) {
+    lastMouseX = e.pageX;
+    lastMouseY = e.pageY;
+    return;
+  }
+
+  let xMoveDiff = lastMouseX - e.pageX;
+  let yMoveDiff = lastMouseY - e.pageY;
+
+  lastMouseX = e.pageX;
+  lastMouseY = e.pageY;
+
+  if (drawLogo) {
+    rect.w = Math.abs((e.pageX - this.offsetLeft) - rect.startX);
     // rect.h = (e.pageY - this.offsetTop) - rect.startY;
     rect.h = rect.w * (logo.naturalHeight/logo.naturalWidth);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     draw();
   }
   if (move) {
-    if (lastMouseX === false || lastMouseY === false) {
-      lastMouseX = e.pageX;
-      lastMouseY = e.pageY;
-      return;
-    }
-
-    let xMoveDiff = lastMouseX - e.pageX;
-    let yMoveDiff = lastMouseY - e.pageY;
-
-    lastMouseX = e.pageX;
-    lastMouseY = e.pageY;
     rect.startX = rect.startX - xMoveDiff;
     rect.startY = rect.startY - yMoveDiff;
     draw();
